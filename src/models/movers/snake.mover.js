@@ -1,4 +1,4 @@
-const {Mover} = require('../mover');
+const {Mover, AccelerationTypes} = require('../mover');
 
 module.exports.SnakeMover = class SnakeMover extends Mover {
 
@@ -8,7 +8,10 @@ module.exports.SnakeMover = class SnakeMover extends Mover {
             family: 'snake',
             location: [0, 0],
             velocity: [0, 0],
-            acceleration: [-0.001, 0.01],
+            acceleration: {
+                type: AccelerationTypes.Target,
+                a: [-0.001, 0.01]
+            },
         });
     }
 

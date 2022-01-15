@@ -1,5 +1,15 @@
-const {V$} = require('../common/vector');
+const {ensure, ensureValues} = require('../common/helpers');
+const {V$, Vector} = require('../common/vector');
 const {nanoid} = require("nanoid");
+
+const AccelerationTypes = {
+    None: 'none',
+    Constant: 'constant',
+    Target: 'target',
+    Random: 'random',
+    Accelerator: 'accelerator',
+};
+module.exports.AccelerationTypes = AccelerationTypes;
 
 module.exports.Mover = class Mover {
 
@@ -8,19 +18,28 @@ module.exports.Mover = class Mover {
      * @param location (vector, optional)
      * @param velocity (vector, required)
      * @param velocityLimit (number, optional)
-     * @param acceleration (vector, optional), if not provided the step()'s 'target' will be used
-     * @param accelerationScale (number, optional), used when the  step()'s 'target' is used instead of 'acceleration'
+     * @param acceleration ({type, scale, accelerator}), @see method accelerate()
      */
     constructor({location, velocity, velocityLimit, acceleration, accelerationScale, family, name}) {
         this.location = location;
         this.velocity = velocity;
         this.velocityLimit = velocityLimit;
-        this.acceleration = acceleration;
-        this.accelerationScale = accelerationScale || 0.5;
+
+        this.accelerate(acceleration);
 
         this.name = name;
         this.family = family;
         this.id = `${family}-${nanoid(5)}`;
+    }
+
+    accelerate({type, scale, acceleration, accelerator}) {
+        ensure(type, 'Acceleration type is required');
+        ensureValues(type, Object.values(AccelerationTypes), 'acceleration.type');
+
+        this.accelerationType = type;
+        this.accelerationScale = scale || 1;
+        this.accelerator = accelerator;
+        return this;
     }
 
     locate(location) {
@@ -36,8 +55,30 @@ module.exports.Mover = class Mover {
      */
     step(target) {
         // http://sylvester.jcoglan.com/api/vector.html
-        const direction = target && V$(target).subtract(this.location).toUnitVector().x(this.accelerationScale);
-        const a = direction || V$(this.acceleration);
+
+        let a;
+        if (this.accelerationType === AccelerationTypes.None) {
+            a = V$([0, 0]);
+
+        } else if (this.accelerationType === AccelerationTypes.Constant) {
+
+        } else if (this.accelerationType === AccelerationTypes.Target) {
+            ensure(target, 'Target is required for this type of acceleration!');
+            const direction = target && V$(target).subtract(this.location).toUnitVector().x(this.accelerationScale);
+            a = direction;
+
+        } else if (this.accelerationType === AccelerationTypes.Random) {
+            a = Vector.Random(2).toUnitVector().x(this.accelerationScale);
+
+        } else if (this.accelerationType === AccelerationTypes.Accelerator) {
+            a = V$(this.accelerator()).toUnitVector();
+
+        } else {
+            throw new Error('Unknown acceleration type: ' + this.accelerationType);
+        }
+
+        // const direction = target && V$(target).subtract(this.location).toUnitVector().x(this.accelerationScale);
+        // const a = direction || V$(this.acceleration);
         const v = $V(this.velocity).add(a).limit(this.velocityLimit);
         const l = $V(this.location).add(v);
 
