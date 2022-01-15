@@ -23,7 +23,7 @@ module.exports.Mover = class Mover {
     constructor({location, velocity, velocityLimit, acceleration, accelerationScale, family, name}) {
         this.location = location;
         this.velocity = velocity;
-        this.velocityLimit = velocityLimit;
+        this.velocityLimit = velocityLimit || 10;
 
         this.accelerate(acceleration);
 
@@ -53,7 +53,7 @@ module.exports.Mover = class Mover {
      * @param target
      * @return {*}
      */
-    step(target) {
+    step(target, {width, height} = {}) {
         // http://sylvester.jcoglan.com/api/vector.html
 
         let a;
@@ -61,6 +61,7 @@ module.exports.Mover = class Mover {
             a = V$([0, 0]);
 
         } else if (this.accelerationType === AccelerationTypes.Constant) {
+            a = V$(this.acceleration);
 
         } else if (this.accelerationType === AccelerationTypes.Target) {
             ensure(target, 'Target is required for this type of acceleration!');
@@ -71,6 +72,7 @@ module.exports.Mover = class Mover {
             a = Vector.Random(2).toUnitVector().x(this.accelerationScale);
 
         } else if (this.accelerationType === AccelerationTypes.Accelerator) {
+            ensure(this.accelerator, 'accelerator function required.')
             a = V$(this.accelerator()).toUnitVector();
 
         } else {
@@ -82,7 +84,7 @@ module.exports.Mover = class Mover {
         const v = $V(this.velocity).add(a).limit(this.velocityLimit);
         const l = $V(this.location).add(v);
 
-        this.location = l.elements;
+        this.location = this.boundLocation(l.elements, {width, height});
         this.velocity = v.elements;
         this.acceleration = a.elements;
         return this;
@@ -92,4 +94,16 @@ module.exports.Mover = class Mover {
         return `${this.id} - ${this.location}`;
     }
 
+    boundLocation(coordinates, {width, height} = {}) {
+        let [x, y]  = coordinates;
+        if (width) {
+            if (x < 0) x = width;
+            if (x > width) x = 0;
+        }
+        if (height) {
+            if (y < 0) y = height;
+            if (y > width) y = 0;
+        }
+        return [x, y];
+    }
 }
