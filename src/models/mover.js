@@ -20,10 +20,11 @@ module.exports.Mover = class Mover {
      * @param velocityLimit (number, optional)
      * @param acceleration ({type, scale, accelerator}), @see method accelerate()
      */
-    constructor({location, velocity, velocityLimit, acceleration, accelerationScale, family, name}) {
+    constructor({location, velocity, velocityLimit, acceleration, family, name, isBoundLocation}) {
+        this.isBoundLocation = isBoundLocation;
         this.location = location;
         this.velocity = velocity;
-        this.velocityLimit = velocityLimit || 10;
+        this.velocityLimit = velocityLimit /*|| 10*/;
 
         this.accelerate(acceleration);
 
@@ -37,6 +38,7 @@ module.exports.Mover = class Mover {
         ensureValues(type, Object.values(AccelerationTypes), 'acceleration.type');
 
         this.accelerationType = type;
+        this.acceleration = acceleration;
         this.accelerationScale = scale || 1;
         this.accelerator = accelerator;
         return this;
@@ -79,9 +81,8 @@ module.exports.Mover = class Mover {
             throw new Error('Unknown acceleration type: ' + this.accelerationType);
         }
 
-        // const direction = target && V$(target).subtract(this.location).toUnitVector().x(this.accelerationScale);
-        // const a = direction || V$(this.acceleration);
-        const v = $V(this.velocity).add(a).limit(this.velocityLimit);
+        const velocity = $V(this.velocity).add(a);
+        const v = this.velocityLimit ? velocity.limit(this.velocityLimit) : velocity;
         const l = $V(this.location).add(v);
 
         this.location = this.boundLocation(l.elements, {width, height});
@@ -96,13 +97,15 @@ module.exports.Mover = class Mover {
 
     boundLocation(coordinates, {width, height} = {}) {
         let [x, y]  = coordinates;
-        if (width) {
-            if (x < 0) x = width;
-            if (x > width) x = 0;
-        }
-        if (height) {
-            if (y < 0) y = height;
-            if (y > width) y = 0;
+        if (this.isBoundLocation) {
+            if (width) {
+                if (x < 0) x = width;
+                if (x > width) x = 0;
+            }
+            if (height) {
+                if (y < 0) y = height;
+                if (y > width) y = 0;
+            }
         }
         return [x, y];
     }
