@@ -27,6 +27,7 @@ module.exports.Mover = class Mover {
         this.velocityLimit = velocityLimit /*|| 10*/;
 
         this.accelerate(acceleration);
+        this.forces = [0, 0]; // #3
 
         this.name = name;
         this.family = family;
@@ -41,6 +42,18 @@ module.exports.Mover = class Mover {
         this.acceleration = acceleration;
         this.accelerationScale = scale || 1;
         this.accelerator = accelerator;
+        return this;
+    }
+
+    /**
+     * #3
+     *
+     * @param force, an array
+     * @param reset, set forces to 0 before if true
+     */
+    applyForce(force, {reset} = {}) {
+        if (reset) this.forces = this.forces.x(0);
+        if (force) this.forces = this.forces.add(V$(force));
         return this;
     }
 
@@ -80,6 +93,8 @@ module.exports.Mover = class Mover {
         } else {
             throw new Error('Unknown acceleration type: ' + this.accelerationType);
         }
+
+        a.add(this.forces); // #3
 
         const velocity = $V(this.velocity).add(a);
         const v = this.velocityLimit ? velocity.limit(this.velocityLimit) : velocity;
