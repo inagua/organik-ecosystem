@@ -1,4 +1,4 @@
-const {Mover, AccelerationTypes} = require('../mover');
+const {Mover, AccelerationTypes, BoundaryStrategies} = require('../mover');
 
 module.exports.SnakeMover = class SnakeMover extends Mover {
 
@@ -6,7 +6,7 @@ module.exports.SnakeMover = class SnakeMover extends Mover {
         super({
             name,
             family: 'snake',
-            isBoundLocation: false,
+            boundaryStrategy: BoundaryStrategies.None,
             location: [0, 0],
             velocity: [0, 0],
             acceleration: {

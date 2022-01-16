@@ -5,6 +5,13 @@ const Perlin = require("perlin-simplex");
 
 const perlin = new Perlin();
 
+const BoundaryStrategies = {
+    None: 'none',
+    Cross: 'cross',
+    Bounce: 'bounce'
+};
+module.exports.BoundaryStrategies = BoundaryStrategies;
+
 const AccelerationTypes = {
     None: 'none',
     Constant: 'constant',
@@ -22,14 +29,15 @@ module.exports.Mover = class Mover {
      * @param location (vector, optional)
      * @param velocity (vector, required)
      * @param velocityLimit (number, optional)
-     * @param acceleration ({type, scale, accelerator}), @see method accelerate()     * @param family
+     * @param acceleration ({type, scale, accelerator}), @see method accelerate()
+     * @param family
      * @param name
-     * @param isBoundLocation
+     * @param boundaryStrategy (@see BoundaryStrategies, BoundaryStrategies.Cross by default)
      * @param mass
      * @param debug
      */
-    constructor({location, velocity, velocityLimit, acceleration, family, name, isBoundLocation, mass, debug}) {
-        this.isBoundLocation = isBoundLocation;
+    constructor({location, velocity, velocityLimit, acceleration, family, name, boundaryStrategy, mass, debug}) {
+        this.boundaryStrategy = boundaryStrategy || BoundaryStrategies.Cross;
         this.location = location;
         this.velocity = velocity;
         this.velocityLimit = velocityLimit /*|| 10*/;
@@ -134,7 +142,7 @@ module.exports.Mover = class Mover {
         const l = $V(this.location).add(v);
 
         this.location = this.boundLocation(l.elements, {width, height});
-        this.velocity = v.elements;
+        this.velocity = this.boundVelocity(l.elements, v.elements, {width, height});
         this.acceleration = a.elements;
 
         if (this.isDebug) {
@@ -148,9 +156,10 @@ module.exports.Mover = class Mover {
         return `${this.id} - ${this.location}`;
     }
 
-    boundLocation(coordinates, {width, height} = {}) {
-        let [x, y]  = coordinates;
-        if (this.isBoundLocation) {
+    boundLocation(location, {width, height} = {}) {
+        let [x, y]  = location;
+        if (this.boundaryStrategy === BoundaryStrategies.None) {
+        } else if (this.boundaryStrategy === BoundaryStrategies.Cross) {
             if (width) {
                 if (x < 0) x = width;
                 if (x > width) x = 0;
@@ -159,7 +168,32 @@ module.exports.Mover = class Mover {
                 if (y < 0) y = height;
                 if (y > height) y = 0;
             }
+        } else if (this.boundaryStrategy === BoundaryStrategies.Bounce) {
+            if (width) {
+                if (x < 0) x = 0;
+                if (x > width) x = width;
+            }
+            if (height) {
+                if (y < 0) y = 0;
+                if (y > height) y = height;
+            }
         }
         return [x, y];
+    }
+
+    boundVelocity(location, velocity, {width, height} = {}) {
+        let [x, y]  = location;
+        let [dx, dy]  = velocity;
+        if (this.boundaryStrategy === BoundaryStrategies.Bounce) {
+            if (width) {
+                if (x < 0) dx = dx * -1;
+                if (x > width) dx = dx * -1;
+            }
+            if (height) {
+                if (y < 0) dy = dy * -1;
+                if (y > height) dy = dy * -1;
+            }
+        }
+        return [dx, dy];
     }
 }

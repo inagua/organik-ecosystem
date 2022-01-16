@@ -1,4 +1,4 @@
-const {Mover, AccelerationTypes} = require('../mover');
+const {Mover, AccelerationTypes, BoundaryStrategies} = require('../mover');
 
 module.exports.FishMover = class FishMover extends Mover {
 
@@ -6,7 +6,7 @@ module.exports.FishMover = class FishMover extends Mover {
         super({
             name,
             family: 'fish',
-            isBoundLocation: true,
+            boundaryStrategy: BoundaryStrategies.Cross,
             location: [0, 0],
             velocity: [0, 0],
             acceleration: {

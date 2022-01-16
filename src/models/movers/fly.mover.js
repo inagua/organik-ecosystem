@@ -1,4 +1,4 @@
-const {Mover, AccelerationTypes} = require('../mover');
+const {Mover, AccelerationTypes, BoundaryStrategies} = require('../mover');
 
 module.exports.FlyMover = class FlyMover extends Mover {
 
@@ -6,7 +6,7 @@ module.exports.FlyMover = class FlyMover extends Mover {
         super({
             name,
             family: 'fly',
-            isBoundLocation: true,
+            boundaryStrategy: BoundaryStrategies.Cross,
             location: [0, 0],
             velocity: [0, 0],
             velocityLimit: 8,
