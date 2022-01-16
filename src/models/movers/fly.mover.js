@@ -11,7 +11,7 @@ module.exports.FlyMover = class FlyMover extends Mover {
             velocity: [0, 0],
             velocityLimit: 8,
             acceleration: {
-                type: AccelerationTypes.Random,
+                type: AccelerationTypes.Perlin,
                 // scale: 2
             },
         });

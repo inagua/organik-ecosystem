@@ -1,12 +1,16 @@
 const {ensure, ensureValues} = require('../common/helpers');
 const {V$, Vector} = require('../common/vector');
 const {nanoid} = require("nanoid");
+const Perlin = require("perlin-simplex");
+
+const perlin = new Perlin();
 
 const AccelerationTypes = {
     None: 'none',
     Constant: 'constant',
     Target: 'target',
     Random: 'random',
+    Perlin: 'perlin', // Perlin's noise
     Accelerator: 'accelerator',
 };
 module.exports.AccelerationTypes = AccelerationTypes;
@@ -27,6 +31,8 @@ module.exports.Mover = class Mover {
         this.velocityLimit = velocityLimit /*|| 10*/;
 
         this.accelerate(acceleration);
+        this.perlinX = Math.floor(Math.random() * 10000);
+        this.perlinY = Math.floor(Math.random() * 10000);
         this.forces = [0, 0]; // #3
 
         this.name = name;
@@ -86,6 +92,13 @@ module.exports.Mover = class Mover {
         } else if (this.accelerationType === AccelerationTypes.Random) {
             a = Vector.Random(2).toUnitVector().x(this.accelerationScale);
 
+        } else if (this.accelerationType === AccelerationTypes.Perlin) {
+            const x = perlin.noise(this.perlinX, 0);
+            this.perlinX += 0.01;
+            const y = perlin.noise(0, this.perlinY);
+            this.perlinY += 0.01;
+            a = V$([x, y]);
+
         } else if (this.accelerationType === AccelerationTypes.Accelerator) {
             ensure(this.accelerator, 'accelerator function required.')
             a = V$(this.accelerator()).toUnitVector();
@@ -94,7 +107,7 @@ module.exports.Mover = class Mover {
             throw new Error('Unknown acceleration type: ' + this.accelerationType);
         }
 
-        a.add(this.forces); // #3
+        a.add(V$(this.forces)); // #3
 
         const velocity = $V(this.velocity).add(a);
         const v = this.velocityLimit ? velocity.limit(this.velocityLimit) : velocity;
