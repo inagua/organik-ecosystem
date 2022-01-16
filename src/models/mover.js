@@ -138,7 +138,7 @@ module.exports.Mover = class Mover {
         this.acceleration = a.elements;
 
         if (this.isDebug) {
-            console.log(`'>> ACC=[${toF2(this.acceleration)}] - VEL=[${toF2(this.velocity)}] - LOC=[${toF2(this.location)}]`);
+            console.log(`'>> [${this.name}] ACC=[${toF2(this.acceleration)}] - VEL=[${toF2(this.velocity)}] - LOC=[${toF2(this.location)}] - MAS=${this.mass}`);
         }
 
         return this;
