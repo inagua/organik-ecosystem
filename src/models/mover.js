@@ -1,4 +1,4 @@
-const {ensure, ensureValues} = require('../common/helpers');
+const {ensure, ensureValues, toF2} = require('../common/helpers');
 const {V$, Vector} = require('../common/vector');
 const {nanoid} = require("nanoid");
 const Perlin = require("perlin-simplex");
@@ -22,9 +22,13 @@ module.exports.Mover = class Mover {
      * @param location (vector, optional)
      * @param velocity (vector, required)
      * @param velocityLimit (number, optional)
-     * @param acceleration ({type, scale, accelerator}), @see method accelerate()
+     * @param acceleration ({type, scale, accelerator}), @see method accelerate()     * @param family
+     * @param name
+     * @param isBoundLocation
+     * @param mass
+     * @param debug
      */
-    constructor({location, velocity, velocityLimit, acceleration, family, name, isBoundLocation}) {
+    constructor({location, velocity, velocityLimit, acceleration, family, name, isBoundLocation, mass, debug}) {
         this.isBoundLocation = isBoundLocation;
         this.location = location;
         this.velocity = velocity;
@@ -33,11 +37,20 @@ module.exports.Mover = class Mover {
         this.accelerate(acceleration);
         this.perlinX = Math.floor(Math.random() * 10000);
         this.perlinY = Math.floor(Math.random() * 10000);
-        this.forces = [0, 0]; // #3
+        this.forces = V$([0, 0]); // #3
+
+        this.mass = mass;
 
         this.name = name;
         this.family = family;
         this.id = `${family}-${nanoid(5)}`;
+
+        this.debug(debug);
+    }
+
+    debug(isDebug) {
+        this.isDebug = isDebug;
+        return this;
     }
 
     accelerate({type, scale, acceleration, accelerator}) {
@@ -57,15 +70,22 @@ module.exports.Mover = class Mover {
      * @param force, an array
      * @param reset, set forces to 0 before if true
      */
-    applyForce(force, {reset} = {}) {
+    force(force, {reset} = {}) {
         if (reset) this.forces = this.forces.x(0);
-        if (force) this.forces = this.forces.add(V$(force));
+        if (force) this.forces = this.forces.add(V$(force).x(1 / (this.mass || 1)));
         return this;
     }
 
     locate(location) {
         this.location = location;
         return this;
+    }
+
+    locateRandomlyIn({width, height}) {
+        return this.locate([
+            Math.floor(Math.random() * width),
+            Math.floor(Math.random() * height)
+        ]);
     }
 
     /**
@@ -107,7 +127,7 @@ module.exports.Mover = class Mover {
             throw new Error('Unknown acceleration type: ' + this.accelerationType);
         }
 
-        a.add(V$(this.forces)); // #3
+        a = a.add(this.forces); // #3
 
         const velocity = $V(this.velocity).add(a);
         const v = this.velocityLimit ? velocity.limit(this.velocityLimit) : velocity;
@@ -116,6 +136,11 @@ module.exports.Mover = class Mover {
         this.location = this.boundLocation(l.elements, {width, height});
         this.velocity = v.elements;
         this.acceleration = a.elements;
+
+        if (this.isDebug) {
+            console.log(`'>> ACC=[${toF2(this.acceleration)}] - VEL=[${toF2(this.velocity)}] - LOC=[${toF2(this.location)}]`);
+        }
+
         return this;
     }
 
@@ -132,7 +157,7 @@ module.exports.Mover = class Mover {
             }
             if (height) {
                 if (y < 0) y = height;
-                if (y > width) y = 0;
+                if (y > height) y = 0;
             }
         }
         return [x, y];
