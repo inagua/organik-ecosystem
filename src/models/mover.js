@@ -8,7 +8,9 @@ const perlin = new Perlin();
 const BoundaryStrategies = {
     None: 'none',
     Cross: 'cross',
-    Bounce: 'bounce'
+    CrossHorizontaly: 'crossHorizontaly',
+    CrossVerticaly: 'crossVerticaly',
+    Bounce: 'bounce',
 };
 module.exports.BoundaryStrategies = BoundaryStrategies;
 
@@ -157,26 +159,31 @@ module.exports.Mover = class Mover {
     }
 
     boundLocation(location, {width, height} = {}) {
+        const cross = (x, bound) => {
+            if (x < 0) x = bound;
+            if (x > bound) x = 0;
+            return x;
+        }
+        const bounce = (x, bound) => {
+            if (x < 0) x = 0;
+            if (x > bound) x = bound;
+            return x;
+        }
+
         let [x, y]  = location;
         if (this.boundaryStrategy === BoundaryStrategies.None) {
         } else if (this.boundaryStrategy === BoundaryStrategies.Cross) {
-            if (width) {
-                if (x < 0) x = width;
-                if (x > width) x = 0;
-            }
-            if (height) {
-                if (y < 0) y = height;
-                if (y > height) y = 0;
-            }
+            if (width) x = cross(x, width);
+            if (height) y = cross(y, height);
         } else if (this.boundaryStrategy === BoundaryStrategies.Bounce) {
-            if (width) {
-                if (x < 0) x = 0;
-                if (x > width) x = width;
-            }
-            if (height) {
-                if (y < 0) y = 0;
-                if (y > height) y = height;
-            }
+            if (width) x = bounce(x, width);
+            if (height) y = bounce(y, height);
+        } else if (this.boundaryStrategy === BoundaryStrategies.CrossHorizontaly) {
+            if (width) x = cross(x, width);
+            if (height) y = bounce(y, height);
+        } else if (this.boundaryStrategy === BoundaryStrategies.CrossVerticaly) {
+            if (width) x = bounce(x, width);
+            if (height) y = cross(y, height);
         }
         return [x, y];
     }
