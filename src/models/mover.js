@@ -99,6 +99,15 @@ module.exports.Mover = class Mover {
     }
 
     /**
+     * To override.
+     *
+     * @param width
+     * @param height
+     */
+    beforeStep({width, height}) {
+    }
+
+    /**
      * @see "The Nature Of Code", Chapter 1, p58
      *
      * @param target
@@ -106,6 +115,8 @@ module.exports.Mover = class Mover {
      */
     step(target, {width, height} = {}) {
         // http://sylvester.jcoglan.com/api/vector.html
+
+        this.beforeStep({width, height});
 
         let a;
         if (this.accelerationType === AccelerationTypes.None) {
@@ -131,7 +142,7 @@ module.exports.Mover = class Mover {
 
         } else if (this.accelerationType === AccelerationTypes.Accelerator) {
             ensure(this.accelerator, 'accelerator function required.')
-            a = V$(this.accelerator()).toUnitVector();
+            a = V$(this.accelerator(this.location, {width, height})).toUnitVector();
 
         } else {
             throw new Error('Unknown acceleration type: ' + this.accelerationType);

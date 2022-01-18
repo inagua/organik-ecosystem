@@ -4,6 +4,7 @@ const {FlyMover} = require('./src/models/movers/fly.mover');
 const {FishMover} = require('./src/models/movers/fish.mover');
 const {WindyBallMover} = require('./src/models/movers/windy-ball.mover');
 const {BalloonMover} = require('./src/models/movers/balloon.mover');
+const {MagneticMover} = require('./src/models/movers/magnetic.mover');
 
 const IsDebug = true;
 
@@ -35,6 +36,7 @@ const ball1 = new WindyBallMover('B1', 1).locateRandomlyIn(resolution).debug(IsD
 const ball2 = new WindyBallMover('B2', 5).locateRandomlyIn(resolution).debug(IsDebug);
 const ball3 = new WindyBallMover('B3', 10).locateRandomlyIn(resolution).debug(IsDebug);
 const balloon1 = new BalloonMover('Ba', 1).locate([5, resolution.height]).debug(IsDebug);
+const magnetic1 = new MagneticMover('M1').locateRandomlyIn(resolution).debug(IsDebug);
 
 setInterval(() => {
     display([
@@ -48,6 +50,7 @@ setInterval(() => {
         ball2.step(null, resolution),
         ball3.step(null, resolution),
         balloon1.step(null, resolution),
+        magnetic1.step(null, resolution),
     ], resolution)
         .map(line => console.log(line))
     ;

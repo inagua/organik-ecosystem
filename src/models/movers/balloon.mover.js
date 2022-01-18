@@ -1,7 +1,10 @@
 const {Mover, AccelerationTypes, BoundaryStrategies} = require('../mover');
 
 /**
- * Helium-filled balloon floating upward, p70
+ * Using forces, simulate a helium-filled balloon floating upward and bouncing off the top of a window.
+ * Can you add a wind force that changes over time, perhaps according to Perlin noise?
+ *
+ * Exercise 2.1, p70
  */
 module.exports.BalloonMover = class BalloonMover extends Mover {
 
