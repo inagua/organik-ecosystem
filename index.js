@@ -5,24 +5,9 @@ const {FishMover} = require('./src/models/movers/fish.mover');
 const {WindyBallMover} = require('./src/models/movers/windy-ball.mover');
 const {BalloonMover} = require('./src/models/movers/balloon.mover');
 const {MagneticMover} = require('./src/models/movers/magnetic.mover');
+const {TermnalDisplay} = require('./src/models/console.display');
 
-const IsDebug = true;
-
-const display = (movers, {width, height}) => {
-    let l = 0;
-    return Array.from({length: height}).map(() => {
-        let line = l + ':' + Array.from({length: width}).map(_ => ' ').join('');
-        movers.forEach(mover => {
-            const [x, y] = mover.location;
-            if (Math.trunc(y) === l) {
-                const i = Math.trunc(x);
-                line = line.substring(0, i) + mover.name + line.substring(i + mover.name.length, line.length);
-            }
-        })
-        l++;
-        return line;
-    });
-}
+const IsDebug = false;
 
 const resolution = {width: 80, height: 40};
 const target = [25, 15];
@@ -38,8 +23,10 @@ const ball3 = new WindyBallMover('B3', 10).locateRandomlyIn(resolution).debug(Is
 const balloon1 = new BalloonMover('Ba', 1).locate([5, resolution.height]).debug(IsDebug);
 const magnetic1 = new MagneticMover('M1').locateRandomlyIn(resolution).debug(IsDebug);
 
+const termnalDisplay = new TermnalDisplay(resolution.width, resolution.height)
+
 setInterval(() => {
-    display([
+    termnalDisplay.render([
         new TargetMover(target),
         snake1.step(target, resolution),
         snake2.step(target, resolution),
