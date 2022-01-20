@@ -23,7 +23,12 @@ const ball3 = new WindyBallMover('B3', 10).locateRandomlyIn(resolution).debug(Is
 const balloon1 = new BalloonMover('Ba', 1).locate([5, resolution.height]).debug(IsDebug);
 const magnetic1 = new MagneticMover('M1').locateRandomlyIn(resolution).debug(IsDebug);
 
-const termnalDisplay = new TermnalDisplay(resolution.width, resolution.height)
+const termnalDisplay = new TermnalDisplay(resolution.width, resolution.height, {
+    layers: [
+        {x: 10, y: 10, width: 10, height: 10, symbol: '~'},
+        {x: 15, y: 15, width: 10, height: 10, symbol: '.'}
+    ]
+})
 
 setInterval(() => {
     termnalDisplay.render([
