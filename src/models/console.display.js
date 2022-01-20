@@ -1,3 +1,12 @@
+
+const renderCellOnLine = (x, y, lineIndex, symbol, line) => {
+    if (Math.trunc(y) === lineIndex) {
+        const i = Math.trunc(x);
+        return line.substring(0, i) + symbol + line.substring(i + symbol.length, line.length);
+    }
+    return line;
+}
+
 module.exports.TermnalDisplay = class TermnalDisplay {
 
     constructor(width, height, {layers} = {}) {
@@ -12,15 +21,11 @@ module.exports.TermnalDisplay = class TermnalDisplay {
             let line = l + ':' + Array.from({length: this.width}).map(_ => ' ').join('');
             movers.forEach(mover => {
                 const [x, y] = mover.location;
-                if (Math.trunc(y) === l) {
-                    const i = Math.trunc(x);
-                    line = line.substring(0, i) + mover.name + line.substring(i + mover.name.length, line.length);
-                }
+                line = renderCellOnLine(x, y, l, mover.name, line)
             })
             l++;
             return line;
         });
     }
-
 
 }
