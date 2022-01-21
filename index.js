@@ -1,4 +1,4 @@
-const {TargetMover} = require('./src/models/movers/target.mover');
+const {NoMover} = require('./src/models/movers/exercises/no.mover');
 const {SnakeMover} = require('./src/models/movers/snake.mover');
 const {FlyMover} = require('./src/models/movers/fly.mover');
 const {FishMover} = require('./src/models/movers/fish.mover');
@@ -32,7 +32,7 @@ const termnalDisplay = new TermnalDisplay(resolution.width, resolution.height, {
 
 setInterval(() => {
     termnalDisplay.render([
-        new TargetMover(target),
+        new NoMover(target),
         snake1.step(target, resolution),
         snake2.step(target, resolution),
         snake3.step(target, resolution),

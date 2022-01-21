@@ -1,6 +1,6 @@
-const {Mover, AccelerationTypes} = require('../mover');
+const {Mover, AccelerationTypes} = require('../../mover');
 
-module.exports.TargetMover = class TargetMover extends Mover {
+module.exports.NoMover = class NoMover extends Mover {
 
     constructor(location, name = 'X') {
         super({
