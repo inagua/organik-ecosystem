@@ -1,4 +1,4 @@
-const {Mover, AccelerationTypes, BoundaryStrategies} = require('../mover');
+const {Mover, AccelerationTypes, BoundaryStrategies} = require('../../mover');
 
 /**
  * Using forces, simulate a helium-filled balloon floating upward and bouncing off the top of a window.

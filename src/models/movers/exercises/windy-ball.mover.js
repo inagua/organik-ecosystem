@@ -1,4 +1,4 @@
-const {Mover, AccelerationTypes, BoundaryStrategies} = require('../mover');
+const {Mover, AccelerationTypes, BoundaryStrategies} = require('../../mover');
 
 module.exports.WindyBallMover = class WindyBallMover extends Mover {
 

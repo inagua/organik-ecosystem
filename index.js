@@ -2,9 +2,9 @@ const {TargetMover} = require('./src/models/movers/target.mover');
 const {SnakeMover} = require('./src/models/movers/snake.mover');
 const {FlyMover} = require('./src/models/movers/fly.mover');
 const {FishMover} = require('./src/models/movers/fish.mover');
-const {WindyBallMover} = require('./src/models/movers/windy-ball.mover');
-const {BalloonMover} = require('./src/models/movers/balloon.mover');
-const {MagneticMover} = require('./src/models/movers/magnetic.mover');
+const {WindyBallMover} = require('./src/models/movers/exercises/windy-ball.mover');
+const {BalloonMover} = require('./src/models/movers/exercises/balloon.mover');
+const {MagneticMover} = require('./src/models/movers/exercises/magnetic.mover');
 const {TermnalDisplay} = require('./src/models/console.display');
 
 const IsDebug = false;
