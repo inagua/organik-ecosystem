@@ -113,7 +113,7 @@ module.exports.Mover = class Mover {
      * @param target
      * @return {*}
      */
-    step(target, {width, height} = {}) {
+    step({target, width, height} = {}) {
         // http://sylvester.jcoglan.com/api/vector.html
 
         this.beforeStep({width, height});

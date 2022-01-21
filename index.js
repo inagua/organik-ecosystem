@@ -23,26 +23,26 @@ const ball3 = new WindyBallMover('B3', 10).locateRandomlyIn(resolution).debug(Is
 const balloon1 = new BalloonMover('Ba', 1).locate([5, resolution.height]).debug(IsDebug);
 const magnetic1 = new MagneticMover('M1').locateRandomlyIn(resolution).debug(IsDebug);
 
-const termnalDisplay = new TermnalDisplay(resolution.width, resolution.height, {
+const terminalDisplay = new TermnalDisplay(resolution.width, resolution.height, {
     layers: [
-        {x: 10, y: 10, width: 10, height: 10, symbol: '~'},
-        {x: 15, y: 15, width: 10, height: 10, symbol: '.'}
+        {x: 10, y: 10, width: 10, height: 10, symbol: '~', friction: 0.01},
+        {x: 15, y: 15, width: 10, height: 10, symbol: '.', friction: 0.05}
     ]
 })
 
 setInterval(() => {
-    termnalDisplay.render([
+    terminalDisplay.render([
         new NoMover(target),
-        snake1.step(target, resolution),
-        snake2.step(target, resolution),
-        snake3.step(target, resolution),
-        fly1.step(null, resolution),
-        fish1.step(null, resolution),
-        ball1.step(null, resolution),
-        ball2.step(null, resolution),
-        ball3.step(null, resolution),
-        balloon1.step(null, resolution),
-        magnetic1.step(null, resolution),
+        snake1.step({target, ...resolution}),
+        snake2.step({target, ...resolution}),
+        snake3.step({target, ...resolution}),
+        fly1.step(resolution),
+        fish1.step(resolution),
+        ball1.step(resolution),
+        ball2.step(resolution),
+        ball3.step(resolution),
+        balloon1.step(resolution),
+        magnetic1.step(resolution),
     ], resolution)
         .map(line => console.log(line))
     ;
