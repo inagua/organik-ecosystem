@@ -11,11 +11,13 @@ const IsDebug = false;
 
 const resolution = {width: 80, height: 40};
 const target = [25, 15];
+const water = {x: 10, y: 10, width: 20, height: 10, symbol: '~', friction: 0.01};
+const sand = {x: 20, y: 15, width: 40, height: 10, symbol: '.', friction: 0.8};
 
 const snake1 = new SnakeMover('s1').locate([0, 0]).debug(IsDebug);
 const snake2 = new SnakeMover('s2').locate([30, 20]).debug(IsDebug);
 const snake3 = new SnakeMover('s3').locate([40, 15]).debug(IsDebug);
-const fly1 = new FlyMover('F1').locate([15, 23]).debug(IsDebug);
+const fly1 = new FlyMover('F1').locate([15, 23]).addLayers([water, sand]).debug(IsDebug);
 const fish1 = new FishMover('P1').locate([35, 7]).debug(IsDebug);
 const ball1 = new WindyBallMover('B1', 1).locateRandomlyIn(resolution).debug(IsDebug);
 const ball2 = new WindyBallMover('B2', 5).locateRandomlyIn(resolution).debug(IsDebug);
@@ -23,12 +25,7 @@ const ball3 = new WindyBallMover('B3', 10).locateRandomlyIn(resolution).debug(Is
 const balloon1 = new BalloonMover('Ba', 1).locate([5, resolution.height]).debug(IsDebug);
 const magnetic1 = new MagneticMover('M1').locateRandomlyIn(resolution).debug(IsDebug);
 
-const terminalDisplay = new TermnalDisplay(resolution.width, resolution.height, {
-    layers: [
-        {x: 10, y: 10, width: 10, height: 10, symbol: '~', friction: 0.01},
-        {x: 15, y: 15, width: 10, height: 10, symbol: '.', friction: 0.05}
-    ]
-})
+const terminalDisplay = new TermnalDisplay(resolution.width, resolution.height, {layers: [water, sand]})
 
 setInterval(() => {
     terminalDisplay.render([

@@ -1,5 +1,5 @@
 const {ensure, ensureValues, toF2} = require('../common/helpers');
-const {V$, Vector} = require('../common/vector');
+const {V$, Vector} = require('../common/vector'); // http://sylvester.jcoglan.com/api/vector.html
 const {nanoid} = require("nanoid");
 const Perlin = require("perlin-simplex");
 
@@ -28,8 +28,8 @@ module.exports.Mover = class Mover {
 
     /**
      *
-     * @param location (vector, optional)
-     * @param velocity (vector, required)
+     * @param location (array, optional)
+     * @param velocity (array, required)
      * @param velocityLimit (number, optional)
      * @param acceleration ({type, scale, accelerator}), @see method accelerate()
      * @param family
@@ -55,11 +55,18 @@ module.exports.Mover = class Mover {
         this.family = family;
         this.id = `${family}-${nanoid(5)}`;
 
+        this.layers = [];
+
         this.debug(debug);
     }
 
     debug(isDebug) {
         this.isDebug = isDebug;
+        return this;
+    }
+
+    addLayers(layers) {
+        this.layers = this.layers.concat(layers);
         return this;
     }
 
@@ -84,6 +91,26 @@ module.exports.Mover = class Mover {
         if (reset) this.forces = this.forces.x(0);
         if (force) this.forces = this.forces.add(V$(force).x(1 / (this.mass || 1)));
         return this;
+    }
+
+    /**
+     * Nature of code, Chapter 2. Forces, example 2.4, p82. #3
+     *
+     * @return Array of frictions as Vectors
+     * @private
+     */
+    _frictions() {
+        // http://sylvester.jcoglan.com/api/vector.html
+        const pX = this.location[0];
+        const pY = this.location[1];
+        const isLayerContainMover = ({x, y, width, height}) => (x <= pX && pX <= x + width) && (y <= pY && pY <= y + height);
+        const velocity = this.velocity;
+        const layerToFriction = ({friction: c}) => V$(velocity).toUnitVector().x(-c);
+
+        return this.layers
+            .filter(isLayerContainMover)
+            .map(layerToFriction)
+        ;
     }
 
     locate(location) {
@@ -118,37 +145,15 @@ module.exports.Mover = class Mover {
 
         this.beforeStep({width, height});
 
-        let a;
-        if (this.accelerationType === AccelerationTypes.None) {
-            a = V$([0, 0]);
+        // #3, p82
+        const forces = this._frictions()
+            .reduce((acc, friction) => acc.add(friction), this.forces.dup())
+        ;
 
-        } else if (this.accelerationType === AccelerationTypes.Constant) {
-            a = V$(this.acceleration);
-
-        } else if (this.accelerationType === AccelerationTypes.Target) {
-            ensure(target, 'Target is required for this type of acceleration!');
-            const direction = target && V$(target).subtract(this.location).toUnitVector().x(this.accelerationScale);
-            a = direction;
-
-        } else if (this.accelerationType === AccelerationTypes.Random) {
-            a = Vector.Random(2).toUnitVector().x(this.accelerationScale);
-
-        } else if (this.accelerationType === AccelerationTypes.Perlin) {
-            const x = perlin.noise(this.perlinX, 0);
-            this.perlinX += 0.01;
-            const y = perlin.noise(0, this.perlinY);
-            this.perlinY += 0.01;
-            a = V$([x, y]);
-
-        } else if (this.accelerationType === AccelerationTypes.Accelerator) {
-            ensure(this.accelerator, 'accelerator function required.')
-            a = V$(this.accelerator(this.location, {width, height})).toUnitVector();
-
-        } else {
-            throw new Error('Unknown acceleration type: ' + this.accelerationType);
-        }
-
-        a = a.add(this.forces); // #3
+        const a = this
+            ._accelerationFor(target, width, height)
+            .add(forces) // #3
+        ;
 
         const velocity = $V(this.velocity).add(a);
         const v = this.velocityLimit ? velocity.limit(this.velocityLimit) : velocity;
@@ -159,10 +164,42 @@ module.exports.Mover = class Mover {
         this.acceleration = a.elements;
 
         if (this.isDebug) {
-            console.log(`'>> [${this.name}] ACC=[${toF2(this.acceleration)}] - VEL=[${toF2(this.velocity)}] - LOC=[${toF2(this.location)}] - MAS=${this.mass}`);
+            const magnitude = (arr) => $V(arr).modulus().toFixed(2);
+            console.log(`'>> [${this.name}] ACC=[${toF2(this.acceleration)}]|${magnitude(this.acceleration)} - VEL=[${toF2(this.velocity)}]|${magnitude(this.velocity)} - LOC=[${toF2(this.location)}] - MAS=${this.mass}`);
         }
 
         return this;
+    }
+
+    _accelerationFor(target, width, height) {
+        if (this.accelerationType === AccelerationTypes.None) {
+            return V$([0, 0]);
+
+        } else if (this.accelerationType === AccelerationTypes.Constant) {
+            return V$(this.acceleration);
+
+        } else if (this.accelerationType === AccelerationTypes.Target) {
+            ensure(target, 'Target is required for this type of acceleration!');
+            const direction = target && V$(target).subtract(this.location).toUnitVector().x(this.accelerationScale);
+            return direction;
+
+        } else if (this.accelerationType === AccelerationTypes.Random) {
+            return Vector.Random(2).toUnitVector().x(this.accelerationScale);
+
+        } else if (this.accelerationType === AccelerationTypes.Perlin) {
+            const x = perlin.noise(this.perlinX, 0);
+            this.perlinX += 0.01;
+            const y = perlin.noise(0, this.perlinY);
+            this.perlinY += 0.01;
+            return V$([x, y]);
+
+        } else if (this.accelerationType === AccelerationTypes.Accelerator) {
+            ensure(this.accelerator, 'accelerator function required.')
+            return V$(this.accelerator(this.location, {width, height})).toUnitVector();
+
+        } else {
+            throw new Error('Unknown acceleration type: ' + this.accelerationType);
+        }
     }
 
     toString() {
@@ -214,4 +251,5 @@ module.exports.Mover = class Mover {
         }
         return [dx, dy];
     }
+
 }
