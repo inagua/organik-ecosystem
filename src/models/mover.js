@@ -100,16 +100,42 @@ module.exports.Mover = class Mover {
      * @private
      */
     _frictions() {
-        // http://sylvester.jcoglan.com/api/vector.html
+        const isFriction = (layer) => layer.hasOwnProperty('friction');
         const pX = this.location[0];
         const pY = this.location[1];
         const isLayerContainMover = ({x, y, width, height}) => (x <= pX && pX <= x + width) && (y <= pY && pY <= y + height);
         const velocity = this.velocity;
-        const layerToFriction = ({friction: c}) => V$(velocity).toUnitVector().x(-c);
+        const frictionForLayer = ({friction: c}) => V$(velocity).toUnitVector().x(-c);
 
         return this.layers
+            .filter(isFriction)
             .filter(isLayerContainMover)
-            .map(layerToFriction)
+            .map(frictionForLayer)
+        ;
+    }
+
+    /**
+     * Nature of code, Chapter 2. Forces, example 2.5, p87. #3
+     *
+     * @return Array of drag forces as Vectors
+     * @private
+     */
+    _dragForces() {
+        const isDragForce = (layer) => layer.hasOwnProperty('drag');
+        const pX = this.location[0];
+        const pY = this.location[1];
+        const isLayerContainMover = ({x, y, width, height}) => (x <= pX && pX <= x + width) && (y <= pY && pY <= y + height);
+        const velocity_ = V$(this.velocity);
+        const dragForceForLayer = ({drag: c}) => {
+            const velocity__ = velocity_.modulus();
+            const drag_ = c * velocity__ * velocity__;
+            return velocity_.toUnitVector().x(-drag_);
+        }
+
+        return this.layers
+            .filter(isDragForce)
+            .filter(isLayerContainMover)
+            .map(dragForceForLayer)
         ;
     }
 
@@ -123,52 +149,6 @@ module.exports.Mover = class Mover {
             Math.floor(Math.random() * width),
             Math.floor(Math.random() * height)
         ]);
-    }
-
-    /**
-     * To override.
-     *
-     * @param width
-     * @param height
-     */
-    beforeStep({width, height}) {
-    }
-
-    /**
-     * @see "The Nature Of Code", Chapter 1, p58
-     *
-     * @param target
-     * @return {*}
-     */
-    step({target, width, height} = {}) {
-        // http://sylvester.jcoglan.com/api/vector.html
-
-        this.beforeStep({width, height});
-
-        // #3, p82
-        const forces = this._frictions()
-            .reduce((acc, friction) => acc.add(friction), this.forces.dup())
-        ;
-
-        const a = this
-            ._accelerationFor(target, width, height)
-            .add(forces) // #3
-        ;
-
-        const velocity = $V(this.velocity).add(a);
-        const v = this.velocityLimit ? velocity.limit(this.velocityLimit) : velocity;
-        const l = $V(this.location).add(v);
-
-        this.location = this.boundLocation(l.elements, {width, height});
-        this.velocity = this.boundVelocity(l.elements, v.elements, {width, height});
-        this.acceleration = a.elements;
-
-        if (this.isDebug) {
-            const magnitude = (arr) => $V(arr).modulus().toFixed(2);
-            console.log(`'>> [${this.name}] ACC=[${toF2(this.acceleration)}]|${magnitude(this.acceleration)} - VEL=[${toF2(this.velocity)}]|${magnitude(this.velocity)} - LOC=[${toF2(this.location)}] - MAS=${this.mass}`);
-        }
-
-        return this;
     }
 
     _accelerationFor(target, width, height) {
@@ -250,6 +230,52 @@ module.exports.Mover = class Mover {
             }
         }
         return [dx, dy];
+    }
+
+    /**
+     * To override.
+     *
+     * @param width
+     * @param height
+     */
+    beforeStep({width, height}) {
+    }
+
+    /**
+     * @see "The Nature Of Code", Chapter 1, p58
+     *
+     * @param target
+     * @return {*}
+     */
+    step({target, width, height} = {}) {
+        // http://sylvester.jcoglan.com/api/vector.html
+
+        this.beforeStep({width, height});
+
+        const forces = this._frictions() // #3, p82
+            .concat(this._dragForces()) // #3, 87
+            .reduce((acc, friction) => acc.add(friction), this.forces.dup())
+        ;
+
+        const a = this
+            ._accelerationFor(target, width, height)
+            .add(forces) // #3
+        ;
+
+        const velocity = $V(this.velocity).add(a);
+        const v = this.velocityLimit ? velocity.limit(this.velocityLimit) : velocity;
+        const l = $V(this.location).add(v);
+
+        this.location = this.boundLocation(l.elements, {width, height});
+        this.velocity = this.boundVelocity(l.elements, v.elements, {width, height});
+        this.acceleration = a.elements;
+
+        if (this.isDebug) {
+            const magnitude = (arr) => $V(arr).modulus().toFixed(2);
+            console.log(`'>> [${this.name}] ACC=[${toF2(this.acceleration)}]|${magnitude(this.acceleration)} - VEL=[${toF2(this.velocity)}]|${magnitude(this.velocity)} - LOC=[${toF2(this.location)}] - MAS=${this.mass}`);
+        }
+
+        return this;
     }
 
 }

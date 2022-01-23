@@ -7,18 +7,21 @@ const {BalloonMover} = require('./src/models/movers/exercises/balloon.mover');
 const {MagneticMover} = require('./src/models/movers/exercises/magnetic.mover');
 const {TermnalDisplay} = require('./src/models/console.display');
 
-const IsDebug = false;
+const IsDebug = true;
 
 const resolution = {width: 80, height: 40};
 const target = [25, 15];
-const water = {x: 10, y: 10, width: 20, height: 10, symbol: '~', friction: 0.01};
-const sand = {x: 20, y: 15, width: 40, height: 10, symbol: '.', friction: 0.8};
+const sand = {x: 20, y: 15, width: 40, height: 10, symbol: '.', friction: 0.8}; // Chapter 2, Force - 2.7 Frictions
+const water = {x: 10, y: 10, width: 20, height: 10, symbol: '~', drag: 0.01};   // Chapter 2, Force - 2.8 Drag force
 
+// Ecosystem
 const snake1 = new SnakeMover('s1').locate([0, 0]).debug(IsDebug);
 const snake2 = new SnakeMover('s2').locate([30, 20]).debug(IsDebug);
 const snake3 = new SnakeMover('s3').locate([40, 15]).debug(IsDebug);
 const fly1 = new FlyMover('F1').locate([15, 23]).addLayers([water, sand]).debug(IsDebug);
 const fish1 = new FishMover('P1').locate([35, 7]).debug(IsDebug);
+
+// Exercises
 const ball1 = new WindyBallMover('B1', 1).locateRandomlyIn(resolution).debug(IsDebug);
 const ball2 = new WindyBallMover('B2', 5).locateRandomlyIn(resolution).debug(IsDebug);
 const ball3 = new WindyBallMover('B3', 10).locateRandomlyIn(resolution).debug(IsDebug);
