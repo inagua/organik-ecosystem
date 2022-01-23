@@ -23,7 +23,9 @@ const fish1 = new FishMover('P1').locate([35, 7]).debug(IsDebug);
 
 // Exercises
 const ball1 = new WindyBallMover('B1', 1).locateRandomlyIn(resolution).debug(IsDebug);
-const ball2 = new WindyBallMover('B2', 5).locateRandomlyIn(resolution).debug(IsDebug);
+const ball2_high = new WindyBallMover('B2h', 5).locate([20, 0]).debug(IsDebug);    // Chapter 2, Force - 2.8 Gravity, same mass, different heights
+const ball2_medium = new WindyBallMover('B2m', 5).locate([30, 15]).debug(IsDebug); // Chapter 2, Force - 2.8 Gravity, same mass, different heights
+const ball2_low = new WindyBallMover('B2l', 5).locate([40, 30]).debug(IsDebug);    // Chapter 2, Force - 2.8 Gravity, same mass, different heights
 const ball3 = new WindyBallMover('B3', 10).locateRandomlyIn(resolution).debug(IsDebug);
 const balloon1 = new BalloonMover('Ba', 1).locate([5, resolution.height]).debug(IsDebug);
 const magnetic1 = new MagneticMover('M1').locateRandomlyIn(resolution).debug(IsDebug);
@@ -39,7 +41,9 @@ setInterval(() => {
         fly1.step(resolution),
         fish1.step(resolution),
         ball1.step(resolution),
-        ball2.step(resolution),
+        ball2_high.step(resolution),
+        ball2_medium.step(resolution),
+        ball2_low.step(resolution),
         ball3.step(resolution),
         balloon1.step(resolution),
         magnetic1.step(resolution),

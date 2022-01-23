@@ -14,11 +14,12 @@ module.exports.WindyBallMover = class WindyBallMover extends Mover {
                 type: AccelerationTypes.None,
                 // acceleration: [0, 0]
             },
-            mass
+            mass,
+            useGravity: true
         });
 
         this.force([0.5, 0]); // WIND
-        this.force([0, 0.1]); // GRAVITY
+        // this.force([0, 0.1]); // GRAVITY // Removed in Exercise 2.5, p88: drag force on falling balls
     }
 
 }

@@ -8,8 +8,8 @@ const perlin = new Perlin();
 const BoundaryStrategies = {
     None: 'none',
     Cross: 'cross',
-    CrossHorizontaly: 'crossHorizontaly',
-    CrossVerticaly: 'crossVerticaly',
+    CrossHorizontally: 'CrossHorizontally',
+    CrossVertically: 'CrossVertically',
     Bounce: 'bounce',
 };
 module.exports.BoundaryStrategies = BoundaryStrategies;
@@ -38,7 +38,7 @@ module.exports.Mover = class Mover {
      * @param mass
      * @param debug
      */
-    constructor({location, velocity, velocityLimit, acceleration, family, name, boundaryStrategy, mass, debug}) {
+    constructor({location, velocity, velocityLimit, acceleration, family, name, boundaryStrategy, mass, useGravity, debug}) {
         this.boundaryStrategy = boundaryStrategy || BoundaryStrategies.Cross;
         this.location = location;
         this.velocity = velocity;
@@ -50,6 +50,7 @@ module.exports.Mover = class Mover {
         this.forces = V$([0, 0]); // #3
 
         this.mass = mass;
+        this.useGravity = useGravity;
 
         this.name = name;
         this.family = family;
@@ -68,6 +69,18 @@ module.exports.Mover = class Mover {
     addLayers(layers) {
         this.layers = this.layers.concat(layers);
         return this;
+    }
+
+    locate(location) {
+        this.location = location;
+        return this;
+    }
+
+    locateRandomlyIn({width, height}) {
+        return this.locate([
+            Math.floor(Math.random() * width),
+            Math.floor(Math.random() * height)
+        ]);
     }
 
     accelerate({type, scale, acceleration, accelerator}) {
@@ -139,16 +152,17 @@ module.exports.Mover = class Mover {
         ;
     }
 
-    locate(location) {
-        this.location = location;
-        return this;
-    }
-
-    locateRandomlyIn({width, height}) {
-        return this.locate([
-            Math.floor(Math.random() * width),
-            Math.floor(Math.random() * height)
-        ]);
+    /**
+     * Nature of code, Chapter 2. Forces, example 2.5, p87. #3
+     *
+     * @return Array of zero or one gravity Vector... to easily handle the no gravity case while adding it (with `.concat()`)!
+     * @private
+     */
+    _gravity() {
+        if (!this.mass || !this.useGravity) return [];
+        const mass = 0.1 * this.mass;
+        const gravity_ = V$([0, mass]);
+        return [gravity_];
     }
 
     _accelerationFor(target, width, height) {
@@ -206,10 +220,10 @@ module.exports.Mover = class Mover {
         } else if (this.boundaryStrategy === BoundaryStrategies.Bounce) {
             if (width) x = bounce(x, width);
             if (height) y = bounce(y, height);
-        } else if (this.boundaryStrategy === BoundaryStrategies.CrossHorizontaly) {
+        } else if (this.boundaryStrategy === BoundaryStrategies.CrossHorizontally) {
             if (width) x = cross(x, width);
             if (height) y = bounce(y, height);
-        } else if (this.boundaryStrategy === BoundaryStrategies.CrossVerticaly) {
+        } else if (this.boundaryStrategy === BoundaryStrategies.CrossVertically) {
             if (width) x = bounce(x, width);
             if (height) y = cross(y, height);
         }
@@ -252,14 +266,15 @@ module.exports.Mover = class Mover {
 
         this.beforeStep({width, height});
 
-        const forces = this._frictions() // #3, p82
+        const forces_ = this._frictions() // #3, p82
             .concat(this._dragForces()) // #3, 87
+            .concat(this._gravity()) // #3, 87
             .reduce((acc, friction) => acc.add(friction), this.forces.dup())
         ;
 
         const a = this
             ._accelerationFor(target, width, height)
-            .add(forces) // #3
+            .add(forces_) // #3
         ;
 
         const velocity = $V(this.velocity).add(a);
