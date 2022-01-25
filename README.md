@@ -18,6 +18,14 @@ To run the project **IN WATCH MODE**:
 npm run watch
 ```
 
+### React
+
+- Run on `node-v14` (`nvm use default v14.18.2`)
+- `npm view react version`
+- `npm run start:react` // => http://localhost:3000
+
+Voir le fichier `/README-react.md`
+
 ## Conventions
 
 - Vanilla JavaScript variables (numbers / scalars, arrays, objects) are named without tailing underscores
