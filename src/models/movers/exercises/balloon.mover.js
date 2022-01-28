@@ -12,7 +12,7 @@ module.exports.BalloonMover = class BalloonMover extends Mover {
         super({
             name,
             family: 'balloon',
-            boundaryStrategy: BoundaryStrategies.CrossHorizontaly,
+            boundaryStrategy: BoundaryStrategies.CrossHorizontally,
             location: [0, 0],
             velocity: [0, 0],
             velocityLimit: 10,

@@ -1,5 +1,5 @@
 const {Mover, AccelerationTypes, BoundaryStrategies} = require('../../mover');
-const {V$, Vector} = require('../../../common/vector');
+// const {V$, Vector} = require('../../../common/vector');
 
 /**
  * Instead of objects bouncing off the edge of the wall, create an example in which an invisible

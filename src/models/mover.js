@@ -38,7 +38,18 @@ module.exports.Mover = class Mover {
      * @param mass
      * @param debug
      */
-    constructor({location, velocity, velocityLimit, acceleration, family, name, boundaryStrategy, mass, useGravity, debug}) {
+    constructor({
+                    location,
+                    velocity,
+                    velocityLimit,
+                    acceleration,
+                    family,
+                    name,
+                    boundaryStrategy,
+                    mass,
+                    useGravity,
+                    debug
+                }) {
         this.boundaryStrategy = boundaryStrategy || BoundaryStrategies.Cross;
         this.location = location;
         this.velocity = velocity;
@@ -64,6 +75,14 @@ module.exports.Mover = class Mover {
     debug(isDebug) {
         this.isDebug = isDebug;
         return this;
+    }
+
+    isStatic() {
+        return this.accelerationType === AccelerationTypes.None
+            && (!this.acceleration || JSON.stringify(this.acceleration) === JSON.stringify([0, 0]))
+            && this.accelerationScale === 1
+            && !this.accelerator
+            ;
     }
 
     addLayers(layers) {
@@ -116,7 +135,12 @@ module.exports.Mover = class Mover {
         const isFriction = (layer) => layer.hasOwnProperty('friction');
         const pX = this.location[0];
         const pY = this.location[1];
-        const isLayerContainMover = ({x, y, width, height}) => (x <= pX && pX <= x + width) && (y <= pY && pY <= y + height);
+        const isLayerContainMover = ({
+                                         x,
+                                         y,
+                                         width,
+                                         height
+                                     }) => (x <= pX && pX <= x + width) && (y <= pY && pY <= y + height);
         const velocity = this.velocity;
         const frictionForLayer = ({friction: c}) => V$(velocity).toUnitVector().x(-c);
 
@@ -124,7 +148,7 @@ module.exports.Mover = class Mover {
             .filter(isFriction)
             .filter(isLayerContainMover)
             .map(frictionForLayer)
-        ;
+            ;
     }
 
     /**
@@ -137,7 +161,12 @@ module.exports.Mover = class Mover {
         const isDragForce = (layer) => layer.hasOwnProperty('drag');
         const pX = this.location[0];
         const pY = this.location[1];
-        const isLayerContainMover = ({x, y, width, height}) => (x <= pX && pX <= x + width) && (y <= pY && pY <= y + height);
+        const isLayerContainMover = ({
+                                         x,
+                                         y,
+                                         width,
+                                         height
+                                     }) => (x <= pX && pX <= x + width) && (y <= pY && pY <= y + height);
         const velocity_ = V$(this.velocity);
         const dragForceForLayer = ({drag: c}) => {
             const velocity__ = velocity_.modulus();
@@ -149,7 +178,7 @@ module.exports.Mover = class Mover {
             .filter(isDragForce)
             .filter(isLayerContainMover)
             .map(dragForceForLayer)
-        ;
+            ;
     }
 
     /**
@@ -212,7 +241,7 @@ module.exports.Mover = class Mover {
             return x;
         }
 
-        let [x, y]  = location;
+        let [x, y] = location;
         if (this.boundaryStrategy === BoundaryStrategies.None) {
         } else if (this.boundaryStrategy === BoundaryStrategies.Cross) {
             if (width) x = cross(x, width);
@@ -231,8 +260,8 @@ module.exports.Mover = class Mover {
     }
 
     boundVelocity(location, velocity, {width, height} = {}) {
-        let [x, y]  = location;
-        let [dx, dy]  = velocity;
+        let [x, y] = location;
+        let [dx, dy] = velocity;
         if (this.boundaryStrategy === BoundaryStrategies.Bounce) {
             if (width) {
                 if (x < 0) dx = dx * -1;
@@ -277,16 +306,16 @@ module.exports.Mover = class Mover {
             .add(forces_) // #3
         ;
 
-        const velocity = $V(this.velocity).add(a);
+        const velocity = V$(this.velocity).add(a);
         const v = this.velocityLimit ? velocity.limit(this.velocityLimit) : velocity;
-        const l = $V(this.location).add(v);
+        const l = V$(this.location).add(v);
 
         this.location = this.boundLocation(l.elements, {width, height});
         this.velocity = this.boundVelocity(l.elements, v.elements, {width, height});
         this.acceleration = a.elements;
 
         if (this.isDebug) {
-            const magnitude = (arr) => $V(arr).modulus().toFixed(2);
+            const magnitude = (arr) => V$(arr).modulus().toFixed(2);
             console.log(`'>> [${this.name}] ACC=[${toF2(this.acceleration)}]|${magnitude(this.acceleration)} - VEL=[${toF2(this.velocity)}]|${magnitude(this.velocity)} - LOC=[${toF2(this.location)}] - MAS=${this.mass}`);
         }
 

@@ -6,7 +6,7 @@ import React from 'react';
 class SVGComponent extends React.Component {
     render() {
         return (
-            <svg width={this.props.width} height={this.props.height}>{this.props.children}</svg>
+            <svg width={this.props.width} height={this.props.height} strokeWidth={this.props.strokeWidth} stroke={this.props.stroke} style={{ borderStyle: 'solid', borderColor: 'red' }}>{this.props.children}</svg>
         );
     }
 }
@@ -19,15 +19,15 @@ class Rectangle extends React.Component {
             </>
         );
     }
-};
+}
 
 class Circle extends React.Component {
     render() {
         return (
-            <circle cx={this.props.cx} cy={this.props.cy} r={this.props.r} stroke={this.props.stroke}>{this.props.children}</circle>
+            <circle cx={this.props.cx} cy={this.props.cy} r={this.props.r} stroke={this.props.stroke} fill={this.props.fill}>{this.props.children}</circle>
         );
     }
-};
+}
 
 class Ellipse extends React.Component {
     render() {
@@ -35,7 +35,7 @@ class Ellipse extends React.Component {
                 <ellipse cx={this.props.cx} cy={this.props.cy} rx={this.props.rx} ry={this.props.ry}>{this.props.children}</ellipse>
         );
     }
-};
+}
 
 class Line extends React.Component {
     render() {
@@ -46,7 +46,7 @@ class Line extends React.Component {
             >{this.props.children}</line>
         );
     }
-};
+}
 
 class Polyline extends React.Component {
     render() {
@@ -56,7 +56,7 @@ class Polyline extends React.Component {
             >{this.props.children}</polyline>
         );
     }
-};
+}
 
 // class DynamicSVGComponent extends React.Component {
 //     getInitialState() {
